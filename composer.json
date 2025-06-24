@@ -1,0 +1,43 @@
+{
+    "name": "reallyspecific/better-llms-txt",
+    "type": "project",
+    "autoload": {
+        "classmap": [
+            "dependencies/"
+        ],
+        "psr-4": {
+            "ReallySpecific\\BetterLLMStxt\\": "classes/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Really Specific",
+            "email": "reallyspecific@pm.me"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/reallyspecific/wp-utils.git"
+        }
+    ],
+    "require-dev": {
+        "reallyspecific/wp-utils": "dev-main",
+        "humbug/php-scoper": "^0.18",
+        "bamarni/composer-bin-plugin": "^1.8",
+        "wa72/html-pretty-min": "^0.3",
+        "php-stubs/wp-cli-stubs": "^2.11",
+        "sniccowp/php-scoper-wordpress-excludes": "^6.8"
+    },
+    "scripts": {
+        "no-dev": "composer update --prefer-dist --no-dev",
+        "scoper": "vendor/bin/php-scoper add-prefix --config=.scoper.inc.php",
+        "dump": "composer dump-autoload -o && composer clear-cache",
+        "build": "composer update && composer dump-autoload -o && composer scoper -- -f && composer no-dev"
+    },
+    "config": {
+        "allow-plugins": {
+            "bamarni/composer-bin-plugin": true
+        }
+    }
+}
