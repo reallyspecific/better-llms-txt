@@ -15,5 +15,4 @@
 /.gitmodules export-ignore
 /export.json export-ignore
 /vendor/bin export-ignore
-/vendor/ export-ignore
 /tests export-ignore
