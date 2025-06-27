@@ -9,13 +9,32 @@ use WP_Term_Query;
 class Terms extends Collection {
 
 	private WP_Term_Query $wp_query;
+
+	private WP_Term_Query $stickies;
 	
 	private function __construct( array $query_args ) {
 		parent::__construct( $query_args['auto_paginate'] ?? true );
+		if ( isset( $query_args['include'] ) ) {
+			$this->stickies   = new WP_Term_Query( [ 'orderby' => 'include', 'taxonomy' => $query_args['taxonomy'] ?? 'category', 'include' => $query_args['include'] ] );
+			unset( $query_args['include'] );
+			$this->current_page = 0;
+		}
 		$this->wp_query   = new WP_Term_Query( [ 'number' => $this->per_page, ...$query_args ] );
 		$this->query_args = $query_args;
 	}
 
+	public function __get( $key ) {
+		switch( $key ) {
+			case 'sticky_count':
+				return count( $this->stickies?->terms ?? [] );
+			case 'query_count':
+				return count( $this->wp_query?->terms ?? [] );
+			case 'total_count':
+				return $this->sticky_count + $this->query_count;
+			default:
+				return parent::__get( $key );
+		}
+	}
 	public static function query( array $query_args = [] ): Collection {
 
 		$query_args = wp_parse_args( $query_args, [
@@ -36,23 +55,12 @@ class Terms extends Collection {
 
 	public function collect( $page_number = null ) {
 
-		$this->wp_query->query_vars['offset'] = ( $page_number ?? $this->current_page - 1 ) * ( $this->per_page );
-
-		if ( $this->query_args['meta_key'] === '_llms_index_priority' && ! has_action( 'terms_clauses', [ $this, 'leftjoin_priority_meta' ] ) ) {
-			add_filter( 'terms_clauses', [ $this, 'join_and_sort_term_meta' ], 10, 3 );
+		if ( isset( $this->stickies ) && empty( $page_number ?? $this->current_page ) ) {
+			$terms = $this->stickies->get_terms();
+		} else {
+			$this->wp_query->query_vars['offset'] = ( $page_number ?? $this->current_page - 1 ) * ( $this->per_page );
+			$terms = $this->wp_query->get_terms();
 		}
-		/*if ( $this->query_args['meta_key'] === '_llms_index_priority' && ! has_filter( 'posts_clauses', [ $this, 'sort_null_join' ] ) ) {
-			add_filter( 'posts_clauses', [ $this, 'sort_null_join' ], 10, 2 );
-		}*/
-
-		$terms = $this->wp_query->get_terms();
-
-		if ( $this->query_args['meta_key'] === '_llms_index_priority' && has_filter( 'terms_clauses', [ $this, 'leftjoin_priority_meta' ] ) ) {
-			remove_filter( 'terms_clauses', [ $this, 'join_and_sort_term_meta' ] );
-		}
-		/*if ( $this->query_args['meta_key'] === '_llms_index_priority' && has_filter( 'posts_clauses', [ $this, 'sort_null_join' ] ) ) {
-			remove_filter( 'posts_clauses', [ $this, 'sort_null_join' ] );
-		}*/
 
 		$this->reset_data( $terms );
 

@@ -5,6 +5,7 @@ namespace ReallySpecific\BetterLLMStxt\Dependencies\RS_Utils\Filesystem;
 use function ReallySpecific\BetterLLMStxt\Dependencies\RS_Utils\debug;
 use function ReallySpecific\BetterLLMStxt\Dependencies\RS_Utils\Assets\path as utils_assets_dir;
 use ZipArchive;
+use Exception;
 /**
  * Creates a directory, recursively building subfolders as needed
  *
@@ -25,6 +26,12 @@ function recursive_mk_dir($path): bool
     }
     return \true;
 }
+/**
+ * Recursively removes a directory and its contents.
+ *
+ * @param string $src The directory to remove.
+ * @return void
+ */
 function recursive_rm_dir(string $src): void
 {
     $dir = opendir($src);
@@ -40,6 +47,37 @@ function recursive_rm_dir(string $src): void
     }
     closedir($dir);
     rmdir($src);
+}
+/**
+ * Recursively copies a directory and its contents.
+ *
+ * @param string $source_folder
+ * @param string $destination_folder
+ * @param bool $verbose Whether to output filenames as they are copied.
+ * @return void
+ * @throws Exception If the destination folder already exists.
+ */
+function recursive_copy_dir(string $source_folder, string $destination_folder, bool $verbose = \false): void
+{
+    if (file_exists($destination_folder)) {
+        throw new Exception("Destination folder `{$destination_folder}` already exists");
+    }
+    mkdir($destination_folder);
+    $directory = opendir($source_folder);
+    while (($file = readdir($directory)) !== \false) {
+        if ($file === '.' || $file === '..' || $file === 'node_modules' || $file === 'tests') {
+            continue;
+        }
+        if (is_dir("{$source_folder}/{$file}") === \true) {
+            recursive_copy_dir("{$source_folder}/{$file}", "{$destination_folder}/{$file}", $verbose);
+        } else {
+            copy("{$source_folder}/{$file}", "{$destination_folder}/{$file}");
+            if ($verbose) {
+                echo "Copying {$destination_folder}/{$file}\n";
+            }
+        }
+    }
+    closedir($directory);
 }
 /**
  * Takes multiple URLs or file paths and combines them into a single string.

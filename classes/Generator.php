@@ -6,16 +6,18 @@ use ReallySpecific\BetterLLMStxt\Dependencies\RS_Utils\Filesystem as FS;
 
 use WP_Post_Type;
 use WP_Query;
+use WP_Taxonomy;
+use WP_Term;
 
 use Exception;
 
 final class Generator {
 
-	private $post_type;
+	private ?WP_Post_Type $post_type;
 
-	private $taxonomy;
+	private ?WP_Taxonomy $taxonomy;
 
-	private $term;
+	private ?WP_Term $term;
 
 	private $buffer;
 
@@ -48,15 +50,18 @@ final class Generator {
 		if ( is_string( $args['taxonomy'] ) ) {
 			$args['taxonomy'] = get_taxonomy( $args['taxonomy'] );
 		}
+		if ( is_string( $args['term'] ) ) {
+			$args['term'] = get_term( $args['term'] );
+		}
 		if ( ! $args['post_type'] instanceof WP_Post_Type && ! $args['taxonomy'] instanceof WP_Taxonomy ) {
 			throw new Exception( 'Post type or taxonomy is required' );
 		}
 		if ( ! in_array( $args['return'], [ 'string', 'filepath' ] ) ) {
 			throw new Exception( 'Return type must be `string` or `filepath`' );
 		}
-		$this->post_type = $args['post_type'];
-		$this->taxonomy  = $args['taxonomy'];
-		$this->term      = $args['term'];
+		$this->post_type = $args['post_type'] ?: null;
+		$this->taxonomy  = $args['taxonomy'] ?: null;
+		$this->term      = $args['term'] ?: null;
 
 		$this->max_links = $args['max_links'] ?: null;
 		$this->tmp_path = $args['tmp_path'] ?? '';
@@ -104,6 +109,10 @@ final class Generator {
 			$collection->per_page = $this->max_links;
 		}
 
+		if ( ! empty( $this->max_links ) ) {
+			$max_links = max( $this->max_links, $collection->sticky_count );
+		}
+
 		$this->open_buffer();
 
 		$title = str_replace( '${section_title}', $template_args['section_title'] ?? $this->post_type->label, $this->section_title_template( $template_args['level'] ?? 2 ) );
@@ -135,7 +144,7 @@ final class Generator {
 			$template_args['indexed'][ $item_id ] = true;
 
 			$item_count += 1;
-			if ( ! empty( $this->max_links ) && $item_count >= $this->max_links ) {
+			if ( ! empty( $max_links ) && $item_count >= $max_links ) {
 				break;
 			}
 

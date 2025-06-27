@@ -14,7 +14,7 @@ final class Plugin extends RS_Plugin {
 		$index_args = [
 			'post_types' => array_keys(
 				array_filter(
-					$this->get_setting( key: 'post_types' )->to_array(),
+					$this->get_setting( key: 'post_types' ) ?: [],
 					fn( $post_type ) => $post_type['enabled']
 				)
 			),
@@ -27,6 +27,9 @@ final class Plugin extends RS_Plugin {
 	}
 
 	public function register_settings( $namespaces = [] ): void {
+
+		add_action( 'rs_util_settings_enqueue_admin_scripts', [ $this, 'enqueue_assets' ] );
+
  		parent::register_settings( [
 			'default' => [
 				'slug'        => 'llms-txt',
@@ -42,6 +45,13 @@ final class Plugin extends RS_Plugin {
 		foreach( $this->indexes as $index ) {
 			$index->delete_file();
 		}
+	}
+
+	public function enqueue_assets() {
+
+		//$file = $this->get_url( 'assets/llms-settings.js' );
+		//wp_enqueue_script( 'llms-settings', $file, [], plugin()->version );
+
 	}
 
 	public function install_settings( array $settings = [] ): void {
@@ -73,7 +83,10 @@ final class Plugin extends RS_Plugin {
 			]
 		);
 
+		$index = 0;
 		foreach( $post_types as $post_type ) {
+			$index += 1;
+			
 			$this->settings()->add_field( [
 				'name'          => "post_types.{$post_type->name}.enabled",
 				'group'         => $post_type->label,
@@ -101,9 +114,7 @@ final class Plugin extends RS_Plugin {
 				'options' => [
 					'publish_date' => __( 'Last Modified', 'better-llms-txt' ),
 					'title'        => __( 'Title', 'better-llms-txt' ),
-					'priority'     => __( 'Priority', 'better-llms-txt' ),
 				],
-				'description' => __( 'Post priority can be defined from the post list screen.', 'better-llms-txt' ),
 				'default'     => 'publish_date',
 				
 			], 'post_type_options' );
@@ -118,6 +129,13 @@ final class Plugin extends RS_Plugin {
 				],
 				'label'       => '',
 				'default'     => 'desc',
+			], 'post_type_options' );
+			$this->settings()->add_field( [
+				'name'          => "post_types.{$post_type->name}.ordering",
+				'group'         => $post_type->label,
+				'type'          => 'hidden',
+				'label'         => '',
+				'default'       => $index,
 			], 'post_type_options' );
 
 		}
@@ -158,7 +176,6 @@ final class Plugin extends RS_Plugin {
 				'options' => [
 					''         => __( 'Default ordering', 'better-llms-txt' ),
 					'name'     => __( 'Order by name', 'better-llms-txt' ),
-					'priority' => __( 'Order by priority', 'better-llms-txt' ),
 				],
 			], 'taxonomy_options' );
 			$this->settings()->add_field( [

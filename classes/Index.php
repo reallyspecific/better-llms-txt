@@ -17,8 +17,6 @@ class Index {
 
 	private $file_url;
 
-	private $sections = [];
-
 	private $post_types = [];
 
 	private $posts_indexed = [];
@@ -28,6 +26,8 @@ class Index {
 	private $issues = [];
 
 	private string $template = '';
+
+	protected $sections = [];
 
 	protected string $settings_index = '';
 
@@ -178,7 +178,7 @@ class Index {
 	 * @param array $args
 	 * @return string|WP_Error
 	 */
-	public function build( array $args = [] ) : string|WP_Error {
+	public function build( array $args = [], array $generate_args = [] ) : string|WP_Error {
 
 		$args = wp_parse_args( $args, [
 			'tmp_path'  => null,
@@ -205,6 +205,7 @@ class Index {
 			$post_args = [
 				'orderby' => $orderby,
 				'order'   => $order ?: 'DESC',
+				...( $generate_args[ 'post_type_' . $post_type ] ?? [] )
 			];
 
 			$post_is_enabled = in_array( $post_type, $this->post_types );
@@ -214,9 +215,6 @@ class Index {
 				$generator = new Generator( $generator_args );
 				
 				switch( $orderby ) {
-					case 'priority':
-						$post_args['orderby'] = 'priority';
-						break;
 					case 'title':
 						$post_args['orderby'] = 'post_title';
 						break;
@@ -255,9 +253,9 @@ class Index {
 						'children' => $this->taxonomies[$tax_name]['show_children'] ?? false,
 						'orderby'  => $tax_orderby ?: 'name',
 						'order'    => $tax_order   ?: 'ASC',
-						...( $args['tax_args'] ?? [] ),
+						...( $generate_args[ 'tax_' . $tax_name ] ?? [] )
 					],[
-						'level'            => $level,
+						//'level'            => $level,
 						'section_title'    => plugin()->get_setting( key: "taxonomies.{$tax_name}.label" ) ?: ucwords( $post_type_obj->labels->singular_name . ' ' . $taxonomy->label ),
 						'indexed'          => &$this->posts_indexed,
 						'allow_duplicates' => ! $this->get_setting( 'no_duplicates' ),
@@ -278,9 +276,9 @@ class Index {
 						$this->sections[ "{$post_type}.{$tax_name}.{$term->slug}" ] = $generator->generate( [
 							'orderby'  => $orderby, // inherit from post type
 							'order'    => $order,   // inherit from post type
-							...( $args['term_args'] ?? [] ),
+							...( $generate_args[ 'term_' . $term->term_id ] ?? [] )
 						],[
-							'level'            => $level,
+							//'level'            => $level,
 							'section_title'    => $term->name,
 							'indexed'          => &$this->posts_indexed,
 							'allow_duplicates' => ! $this->get_setting( 'no_duplicates' ),
@@ -369,7 +367,7 @@ class Index {
 	 *
 	 * @return string|WP_Error returns the output path on success or a WP_Error on failure
 	 */
-	private function write() : string|WP_Error {
+	protected function write() : string|WP_Error {
 
 		$template = $this->get_template();
 		$template = $this->process_template( $template );
@@ -386,6 +384,8 @@ class Index {
 
 		$template = explode( '${sections}', $template );
 		$intro = array_shift( $template );
+
+		
 
 		try {
 

@@ -16,3 +16,4 @@
 /export.json export-ignore
 /vendor/bin export-ignore
 /tests export-ignore
+.copy-assets.php

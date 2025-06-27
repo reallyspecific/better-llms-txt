@@ -19,12 +19,12 @@ class Full extends Index {
 
 	}
 
-	public function build( array $args = [] ) : string|WP_Error {
+	public function build( array $args = [], array $generate_args = [] ) : string|WP_Error {
 
 		return parent::build( [
 			'max_links' => 0,
 			...$args
-		] );
+		], $generate_args );
 
 	}
 

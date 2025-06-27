@@ -3,7 +3,7 @@
         'name' => 'reallyspecific/better-llms-txt',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '0330c709675149fa476aea8d6ef758d9f5a75f8c',
+        'reference' => 'a2438995f84247a2a66ca533908809a05f499d04',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'reallyspecific/better-llms-txt' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '0330c709675149fa476aea8d6ef758d9f5a75f8c',
+            'reference' => 'a2438995f84247a2a66ca533908809a05f499d04',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

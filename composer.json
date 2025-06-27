@@ -33,7 +33,10 @@
         "no-dev": "composer update --prefer-dist --no-dev",
         "scoper": "vendor/bin/php-scoper add-prefix --config=.scoper.inc.php",
         "dump": "composer dump-autoload -o && composer clear-cache",
-        "build": "composer update && composer dump-autoload -o && composer scoper -- -f && composer no-dev"
+        "build": "composer update && composer dump-autoload -o && composer scoper -- -f && composer no-dev",
+        "copy-utils": "vendor/bin/rs-cli -cv",
+        "sync:all": "composer copy-utils && composer scoper -- -f",
+        "sync:assets": "composer copy-utils && composer copy-utils -- --source=vendor/reallyspecific/wp-utils --destination=dependencies/reallyspecific/wp-utils --subdir=assets"
     },
     "config": {
         "allow-plugins": {

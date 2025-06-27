@@ -9,11 +9,31 @@ use WP_Query;
 class Posts extends Collection {
 
 	private WP_Query $wp_query;
-	
+
+	private WP_Query $stickies;
+
 	private function __construct( array $query_args ) {
 		parent::__construct( $query_args['auto_paginate'] ?? true );
+		if ( isset( $query_args['include'] ) ) {
+			$this->stickies   = new WP_Query( [ 'orderby' => 'post__in', 'post_type' => $query_args['post_type'] ?? 'post', 'post__in' => $query_args['include'], 'nopaging' => true, 'per_page' => -1 ] );
+			unset( $query_args['include'] );
+			$this->current_page = 0;
+		}
 		$this->wp_query   = new WP_Query( [ 'posts_per_page' => $this->per_page, ...$query_args ] );
 		$this->query_args = $query_args;
+	}
+
+	public function __get( $key ) {
+		switch( $key ) {
+			case 'sticky_count':
+				return $this->stickies?->found_posts ?? 0;
+			case 'query_count':
+				return $this->wp_query?->found_posts ?? 0;
+			case 'total_count':
+				return $this->sticky_count + $this->query_count;
+			default:
+				return parent::__get( $key );
+		}
 	}
 
 	public static function query( array $query_args = [] ): Collection {
@@ -50,22 +70,11 @@ class Posts extends Collection {
 
 	public function collect( $page_number = null ) {
 
-		$this->wp_query->set( 'paged', $page_number ?? $this->current_page );
-
-		if ( $this->query_args['meta_key'] === '_llms_index_priority' && ! has_action( 'get_meta_sql', [ $this, 'leftjoin_priority_meta' ] ) ) {
-			add_filter( 'get_meta_sql', [ $this, 'leftjoin_priority_meta' ], 10, 2 );
-		}
-		if ( $this->query_args['meta_key'] === '_llms_index_priority' && ! has_filter( 'posts_clauses', [ $this, 'sort_null_join' ] ) ) {
-			add_filter( 'posts_clauses', [ $this, 'sort_null_join' ], 10, 2 );
-		}
-
-		$posts = $this->wp_query->get_posts();
-
-		if ( $this->query_args['meta_key'] === '_llms_index_priority' && has_filter( 'get_meta_sql', [ $this, 'leftjoin_priority_meta' ] ) ) {
-			remove_filter( 'get_meta_sql', [ $this, 'leftjoin_priority_meta' ] );
-		}
-		if ( $this->query_args['meta_key'] === '_llms_index_priority' && has_filter( 'posts_clauses', [ $this, 'sort_null_join' ] ) ) {
-			remove_filter( 'posts_clauses', [ $this, 'sort_null_join' ] );
+		if ( isset( $this->stickies ) && empty( $page_number ?? $this->current_page ) ) {
+			$posts = $this->stickies->get_posts();
+		} else {
+			$this->wp_query->set( 'paged', $page_number ?? $this->current_page );
+			$posts = $this->wp_query->get_posts();
 		}
 
 		$this->reset_data( $posts );

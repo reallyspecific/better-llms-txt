@@ -766,15 +766,16 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/reallyspecific/wp-utils.git",
-                "reference": "aca20fb38c1e8080c6c7aa73abb2e599f7f5986d"
+                "reference": "8fa14b9583a086c6a0292cd4a7116928c58cb6c1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reallyspecific/wp-utils/zipball/aca20fb38c1e8080c6c7aa73abb2e599f7f5986d",
-                "reference": "aca20fb38c1e8080c6c7aa73abb2e599f7f5986d",
+                "url": "https://api.github.com/repos/reallyspecific/wp-utils/zipball/8fa14b9583a086c6a0292cd4a7116928c58cb6c1",
+                "reference": "8fa14b9583a086c6a0292cd4a7116928c58cb6c1",
                 "shasum": ""
             },
             "require": {
+                "composer-runtime-api": "^2.2.2",
                 "erusev/parsedown": "^1.7",
                 "php": ">=8.2"
             },
@@ -786,6 +787,9 @@
                 "sniccowp/php-scoper-wordpress-excludes": "^6.8"
             },
             "default-branch": true,
+            "bin": [
+                "tools/rs-cli"
+            ],
             "type": "library",
             "scripts": {
                 "scope-sample-plugin": [
@@ -811,7 +815,7 @@
                 "source": "https://github.com/reallyspecific/wp-utils/tree/main",
                 "issues": "https://github.com/reallyspecific/wp-utils/issues"
             },
-            "time": "2025-06-24T23:01:16+00:00"
+            "time": "2025-06-27T14:05:01+00:00"
         },
         {
             "name": "sniccowp/php-scoper-wordpress-excludes",

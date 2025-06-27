@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/reallyspecific/better-llms-txt
  * Update URI: https://github.com/reallyspecific/better-llms-txt
  * Description: A plugin for making comprehensive index files for LLMs to parse.
- * Version: 1.0.0-rc1
+ * Version: 1.0.0-rc2
  * Author: Really Specific
  * Author URI: https://github.com/reallyspecific
  * License: MIT

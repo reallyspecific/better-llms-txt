@@ -17,7 +17,7 @@ TODO: Describe this plugin
 == Changelog ==
 
 = 1.0.0 =
-Released date: June 24, 2025
+Released date: June 27, 2025
 
 == Copyright ==
 

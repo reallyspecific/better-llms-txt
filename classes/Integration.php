@@ -10,16 +10,18 @@ class Integration extends Service {
 		parent::__construct( $plugin );
 
 		add_action( 'template_redirect', [ $this, 'maybe_handle_404' ] );
-		add_filter( 'manage_posts_columns', [ $this, 'maybe_add_priority_column' ], 10, 2 );
-		add_filter( 'manage_pages_columns', [ $this, 'maybe_add_priority_column' ], 10, 1 );
-		add_action( 'manage_posts_custom_column',  [ $this, 'display_priority_column' ], 10, 2 );
-		add_action( 'manage_pages_custom_column',  [ $this, 'display_priority_column' ], 10, 2 );
-		add_action( 'quick_edit_custom_box',  [ $this, 'quick_edit_fields' ], 10, 2 );
-		add_action( 'save_post', [ $this, 'quick_edit_save' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'register_admin_scripts' ] );
+		//add_filter( 'manage_posts_columns', [ $this, 'maybe_add_priority_column' ], 10, 2 );
+		//add_filter( 'manage_pages_columns', [ $this, 'maybe_add_priority_column' ], 10, 1 );
+		//add_action( 'manage_posts_custom_column',  [ $this, 'display_priority_column' ], 10, 2 );
+		//add_action( 'manage_pages_custom_column',  [ $this, 'display_priority_column' ], 10, 2 );
+		//add_action( 'quick_edit_custom_box',  [ $this, 'quick_edit_fields' ], 10, 2 );
+		//add_action( 'save_post', [ $this, 'quick_edit_save' ] );
+		//add_action( 'admin_enqueue_scripts', [ $this, 'register_admin_scripts' ] );
 		add_action( 'rs_util_settings_saved', [ $this, 'settings_saved' ] );
 
-		$taxonomies_enabled = $plugin->get_setting( key: 'taxonomies' );
+		add_filter( 'rs_util_settings_render_sortable_values', [ $this, 'return_sortable_value_labels' ], 10, 2 );
+
+		/*$taxonomies_enabled = $plugin->get_setting( key: 'taxonomies' );
 		foreach ( $taxonomies_enabled as $taxonomy => $options ) {
 			if ( ! $options['enabled'] ) {
 				continue;
@@ -27,7 +29,34 @@ class Integration extends Service {
 			add_action( "{$taxonomy}_add_form_fields", [ $this, 'add_term_priority_field' ], 10, 1 );
 			add_action( "{$taxonomy}_edit_form_fields", [ $this, 'edit_term_priority_field' ], 10, 2 );
 			add_action( "saved_{$taxonomy}", [ $this, 'save_term_priority' ], 10, 2 );
+		}*/
+	}
+
+	public function return_sortable_value_labels( $values, $field ) {
+
+		if ( str_contains( $field['name'], '.post_' ) || str_contains( $field['name'], '.term_' ) ) {
+			foreach( $values as &$value ) {
+				$title = get_the_title( $value );
+				$value = [
+					'value' => $value,
+					'label' => $title,
+				];
+			}
 		}
+
+		if ( str_contains( $field['name'], '.tax_' ) ) {
+			$taxonomy = end( explode( '_', $field['name'] ) );
+			foreach( $values as &$value ) {
+				$term = get_term_by( 'term_id', $value, $taxonomy );
+				$value = [
+					'value' => $value,
+					'label' => $term->name,
+				];
+			}
+		}
+
+		return $values;
+
 	}
 
 	public function maybe_handle_404() {
