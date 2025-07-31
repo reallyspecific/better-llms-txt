@@ -225,7 +225,7 @@ class Index {
 				$post_args += ( $args['post_args'] ?? [] );
 
 				$this->sections[ $post_type ] = $generator->generate( $post_args, [
-					'section_title'    => plugin()->get_setting( key: "post_types.{$post_type}.label" ) ?: $post_type->label,
+					'section_title'    => plugin()->get_setting( key: "post_types.{$post_type}.label" ) ?: $post_type,
 					'indexed'          => &$this->posts_indexed,
 					'allow_duplicates' => ! $this->get_setting( 'no_duplicates' ),
 				] );
