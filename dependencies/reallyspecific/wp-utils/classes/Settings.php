@@ -553,7 +553,7 @@ class Settings
             $attrs['data-source'] = json_encode(['url' => $field['data'], 'value' => $value, 'label' => $label]);
         }
         $buffer .= '<select ' . array_to_attr_string($attrs) . '>';
-        foreach ($field['options'] as $key => $option) {
+        foreach (($field['options'] ?? []) as $key => $option) {
             if (isset($option['group'])) {
                 $buffer .= sprintf('<optgroup label="%s">', esc_attr($option['group']));
                 $suboptions = $option['options'] ?? [];
