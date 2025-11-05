@@ -33,10 +33,10 @@ function &plugin() {
 	}
 
 	$instance = Plugin::new( [
-			'name'        => 'Better LLMS.txt',
-			'slug'        => 'better-llms-txt',
-			'i18n_domain' => 'better-llms-txt',
-			'file'        => __FILE__,
+		'name'        => 'Better LLMS.txt',
+		'slug'        => 'better-llms-txt',
+		'i18n_domain' => 'better-llms-txt',
+		'file'        => __FILE__,
 	] );
 
 	return $instance;
